@@ -40,7 +40,7 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
    input 	 vclk;	// video clock from camera
    input [2:0] 	 fvh;
    input 	 dv;
-   input [7:0] 	 din;
+   input [29:0] 	 din;
    output [18:0] ntsc_addr;
    output [35:0] ntsc_data;
    output 	 ntsc_we;	// write enable for NTSC data
@@ -54,7 +54,7 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
 
    reg [9:0] 	 col = 0;
    reg [9:0] 	 row = 0;
-   reg [7:0] 	 vdata = 0;
+   reg [29:0] 	 vdata = 0;
    reg 		 vwe;
    reg 		 old_dv;
    reg 		 old_frame;	// frames are even / odd interlaced
