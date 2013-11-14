@@ -54,6 +54,8 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
 
    reg [9:0] 	 col = 0;
    reg [9:0] 	 row = 0;
+   // Bit width of vdata = din (see line
+   // vdata <= ... ? din : vdata;)
    reg [29:0] 	 vdata = 0;
    reg 		 vwe;
    reg 		 old_dv;
@@ -83,10 +85,34 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
    // synchronize with system clock
 
    reg [9:0] x[1:0],y[1:0];
-   reg [7:0] data[1:0];
+   reg [17:0] data[1:0];
    reg       we[1:0];
    reg 	     eo[1:0];
 
+   /*------------------------------------------------------------
+    Color Space Conversion
+    -------------------------------------------------------------
+    Let us divide up vdata, so that we know what we're talking
+    vdata (YCrCb needs to be converted to RGB, cutoff 2 LSB)
+    */
+   wire [9:0] luma,cr,cb;
+   assign luma = vdata[29:20];
+   assign cr = vdata[19:10];
+   assign cb = vdata[9:0];
+
+   wire [7:0] R_eight, G_eight, B_eight;
+
+   YCrCb2RGB cspaceConv(.R(R_eight), .G(G_eight), .B(B_eight),
+			.clk(clk), .rst(1'b0), .Y(luma), 
+			.Cr(cr), .Cb(cb));
+   //Maybe need to account for five clock cycle delay
+   //of color space conversion
+   
+   /*------------------------------------------------------------
+    Data Input
+    -------------------------------------------------------------
+    Let us truncate the 8bit RGB to 6bit (LSB truncated)
+    */
    always @(posedge clk)
      begin
 	{x[1],x[0]} <= {x[0],col};
