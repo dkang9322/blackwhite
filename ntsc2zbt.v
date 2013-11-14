@@ -117,7 +117,8 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
      begin
 	{x[1],x[0]} <= {x[0],col};
 	{y[1],y[0]} <= {y[0],row};
-	{data[1],data[0]} <= {data[0],vdata};
+	{data[1],data[0]} <= {data[0],
+			 {R_eight[7:2], G_eight[7:2], B_eight[7:2]}};
 	{we[1],we[0]} <= {we[0],vwe};
 	{eo[1],eo[0]} <= {eo[0],even_odd};
      end
@@ -129,11 +130,13 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
    always @(posedge clk) old_we <= we[1];
 
    // shift each set of four bytes into a large register for the ZBT
+
    
-   reg [31:0] mydata;
+   // Change mydata to 36-bit (fully occupy)
+   reg [35:0] mydata;
    always @(posedge clk)
      if (we_edge)
-       mydata <= { mydata[23:0], data[1] };
+       mydata <= { mydata[17:0], data[1] };
    
    // NOTICE : Here we have put 4 pixel delay on mydata. For example, when:
    // (x[1], y[1]) = (60, 80) and eo[1] = 0, then:
@@ -180,7 +183,9 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
    
       
    // alternate (256x192) image data and address
-   wire [31:0] mydata2 = {data[1],data[1],data[1],data[1]};
+   // also need to change mydata2 size to 36
+   // but doesn't really matter what we give out for this
+   wire [35:0] mydata2 = {data[1],data[1]};
    wire [18:0] myaddr2 = {1'b0, y_addr[8:0], eo_delay[3], x_addr[7:0]};
 
    // update the output address and data only when four bytes ready
@@ -193,7 +198,7 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
      if ( ntsc_we )
        begin
 	  ntsc_addr <= sw ? myaddr2 : myaddr;	// normal and expanded modes
-	  ntsc_data <= sw ? {4'b0,mydata2} : {4'b0,mydata};
+	  ntsc_data <= sw ? mydata2 : mydata;
        end
    
 endmodule // ntsc_to_zbt
