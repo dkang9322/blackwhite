@@ -483,7 +483,6 @@ module zbt_6111_sample(beep, audio_reset_b,
 		    ntsc_addr, ntsc_data, ntsc_we, switch[6]);
 
    // code to write pattern to ZBT memory
-   //Potential Editing Needed
    reg [31:0] 	count;
    always @(posedge clk) count <= reset ? 0 : count + 1;
 
@@ -494,8 +493,9 @@ module zbt_6111_sample(beep, audio_reset_b,
    // mux selecting read/write to memory based on which write-enable is chosen
 
    wire 	sw_ntsc = ~switch[7];
-   //Potential Editing Needed
-   wire 	my_we = sw_ntsc ? (hcount[1:0]==2'd2) : blank;
+   //Rational is that hcount[0]=0 -> then pixel value available
+   //2 clock cycles later (Edited)
+   wire 	my_we = sw_ntsc ? (hcount[0]==1'd0) : blank;
    wire [18:0] 	write_addr = sw_ntsc ? ntsc_addr : vram_addr2;
    wire [35:0] 	write_data = sw_ntsc ? ntsc_data : vpat;
 
