@@ -192,7 +192,8 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
 
    reg [18:0] ntsc_addr;
    reg [35:0] ntsc_data;
-   wire       ntsc_we = sw ? we_edge : (we_edge & (x_delay[31:30]==2'b00));
+   // I think this timing will address the issue
+   wire       ntsc_we = sw ? we_edge : (we_edge & (x_delay[31]==1'b0));
 
    always @(posedge clk)
      if ( ntsc_we )
