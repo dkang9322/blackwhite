@@ -442,6 +442,13 @@ module zbt_6111_sample(beep, audio_reset_b,
 		   ram0_clk_not_used,   //to get good timing, don't connect ram_clk to zbt_6111
 		   ram0_we_b, ram0_address, ram0_data, ram0_cen_b);
 
+   /*------------------------------------------------------------
+    Color Modification
+    -------------------------------------------------------------
+    Adding RGB color
+    */
+
+   //Potential Editing Needed
    // generate pixel value from reading ZBT memory
    wire [7:0] 	vr_pixel;
    wire [18:0] 	vram_addr1;
@@ -471,10 +478,12 @@ module zbt_6111_sample(beep, audio_reset_b,
    wire [35:0] ntsc_data;
    wire        ntsc_we;
    // Currently writing only the intensity values
-   ntsc_to_zbt n2z (clk, tv_in_line_clock1, fvh, dv, ycrcb[29:22],
+   // Now edited such that ycrcb values are full 30 bits
+   ntsc_to_zbt n2z (clk, tv_in_line_clock1, fvh, dv, ycrcb,
 		    ntsc_addr, ntsc_data, ntsc_we, switch[6]);
 
    // code to write pattern to ZBT memory
+   //Potential Editing Needed
    reg [31:0] 	count;
    always @(posedge clk) count <= reset ? 0 : count + 1;
 
@@ -485,6 +494,7 @@ module zbt_6111_sample(beep, audio_reset_b,
    // mux selecting read/write to memory based on which write-enable is chosen
 
    wire 	sw_ntsc = ~switch[7];
+   //Potential Editing Needed
    wire 	my_we = sw_ntsc ? (hcount[1:0]==2'd2) : blank;
    wire [18:0] 	write_addr = sw_ntsc ? ntsc_addr : vram_addr2;
    wire [35:0] 	write_data = sw_ntsc ? ntsc_data : vpat;
@@ -499,6 +509,7 @@ module zbt_6111_sample(beep, audio_reset_b,
 
    // select output pixel data
 
+   //Potential Editing Needed
    reg [7:0] 	pixel;
    reg 	b,hs,vs;
    
