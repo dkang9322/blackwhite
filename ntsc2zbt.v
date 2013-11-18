@@ -105,7 +105,7 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
    YCrCb2RGB cspaceConv(.R(R_eight), .G(G_eight), .B(B_eight),
 			.clk(clk), .rst(1'b0), .Y(luma), 
 			.Cr(cr), .Cb(cb));
-   //Maybe need to account for five clock cycle delay
+   //Maybe need to account for three clock cycle delay
    //of color space conversion
    
    /*------------------------------------------------------------
@@ -193,7 +193,8 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
    reg [18:0] ntsc_addr;
    reg [35:0] ntsc_data;
    // I think this timing will address the issue
-   wire       ntsc_we = sw ? we_edge : (we_edge & (x_delay[31]==1'b0));
+   // Turns out x_delay[30] == 1'b0 is the check we want to perform
+   wire       ntsc_we = sw ? we_edge : (we_edge & (x_delay[30]==1'b0));
 
    always @(posedge clk)
      if ( ntsc_we )
