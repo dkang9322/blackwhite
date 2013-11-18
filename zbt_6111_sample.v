@@ -688,8 +688,10 @@ module vram_display(reset,clk,hcount,vcount,vr_pixel,
    //forecast hcount & vcount 8 clock cycles ahead to get data from ZBT
    wire [10:0] hcount_f = (hcount >= 1048) ? (hcount - 1048) : (hcount + 8);
    wire [9:0] vcount_f = (hcount >= 1048) ? ((vcount == 805) ? 0 : vcount + 1) : vcount;
-      
-   wire [18:0] 	 vram_addr = {1'b0, vcount_f, hcount_f[9:2]};
+
+   // Change of address scheme to compensate for reading color
+   //wire [18:0] vram_addr = {1'b0, vcount_f, hcount_f[9:2]};
+   wire [18:0] vram_addr = {vcount_f, hcount_f[9:1]};
 
    wire[1:0] 	 hc4 = hcount[1:0];
    reg [17:0] 	 vr_pixel;
@@ -697,16 +699,16 @@ module vram_display(reset,clk,hcount,vcount,vr_pixel,
    reg [35:0] 	 last_vr_data;
 
    always @(posedge clk)
-     // On even hcount, we don't want to use data from vram_read_data
      last_vr_data <= (hc4[0]==1'd1) ? vr_data_latched : last_vr_data;
 
    always @(posedge clk)
      vr_data_latched <= (hc4[0]==1'd0) ? vram_read_data : vr_data_latched;
 
    always @(*)		// each 36-bit word from RAM is decoded to 2 18-bits
-     case (hc4)
-       2'd1: vr_pixel <= last_vr_data[17:0];
-       2'd0: vr_pixel <= last_vr_data[35:18];
+     case (hc4[0])
+       // Sanity Check
+       1'd1: vr_pixel <= last_vr_data[17:0];
+       1'd0: vr_pixel <= last_vr_data[35:18];
        default: vr_pixel <= vr_pixel;
      endcase
 

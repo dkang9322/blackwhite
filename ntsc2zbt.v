@@ -176,8 +176,10 @@ module ntsc_to_zbt(clk, vclk, fvh, dv, din, ntsc_addr, ntsc_data, ntsc_we, sw);
    // compute address to store data in
    wire [8:0] y_addr = y_delay[38:30];
 	wire [9:0] x_addr = x_delay[39:30];
-	
-   wire [18:0] myaddr = {1'b0, y_addr[8:0], eo_delay[3], x_addr[9:2]};
+
+   // Change of address scheme to compensate for reading color
+   //wire [18:0] 	   myaddr = {1'b0, y_addr[8:0], eo_delay[3], x_addr[9:2]};
+   wire [18:0] 	   myaddr = {y_addr[8:0], eo_delay[3], x_addr[9:1]};
    
    // Now address (0,0,0) contains pixel data(0,0) etc.
    
